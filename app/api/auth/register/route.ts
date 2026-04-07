@@ -36,7 +36,6 @@ export async function POST(request: Request) {
         name: parsedBody.data.name,
         email: parsedBody.data.email,
         passwordHash,
-        role: parsedBody.data.role,
       },
     });
 
@@ -44,16 +43,17 @@ export async function POST(request: Request) {
       userId: user.id,
       email: user.email,
       name: user.name,
-      role: user.role,
     });
 
     const response = NextResponse.json({ ok: true }, { status: 201 });
     setSessionCookie(response, token);
 
     return response;
-  } catch {
+  } catch (error) {
+    console.error("Signup error:", error);
+
     return NextResponse.json(
-      { error: "The signup service is not ready yet. Please try again." },
+      { error: "Database connection failed. Check the current database credentials." },
       { status: 500 },
     );
   }

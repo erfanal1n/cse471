@@ -43,16 +43,17 @@ export async function POST(request: Request) {
       userId: user.id,
       email: user.email,
       name: user.name,
-      role: user.role,
     });
 
     const response = NextResponse.json({ ok: true });
     setSessionCookie(response, token);
 
     return response;
-  } catch {
+  } catch (error) {
+    console.error("Login error:", error);
+
     return NextResponse.json(
-      { error: "The login service is not ready yet. Please try again." },
+      { error: "Database connection failed. Check the current database credentials." },
       { status: 500 },
     );
   }

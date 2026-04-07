@@ -1,4 +1,3 @@
-import type { UserRole } from "@prisma/client";
 import { cookies } from "next/headers";
 import { SignJWT, jwtVerify } from "jose";
 import type { JWTPayload } from "jose";
@@ -11,7 +10,6 @@ export type SessionUser = {
   userId: string;
   email: string;
   name: string;
-  role: UserRole;
 };
 
 type SessionPayload = JWTPayload & SessionUser;
@@ -31,7 +29,6 @@ export async function createSessionToken(user: SessionUser) {
     userId: user.userId,
     email: user.email,
     name: user.name,
-    role: user.role,
   })
     .setProtectedHeader({ alg: "HS256" })
     .setIssuedAt()
@@ -75,7 +72,7 @@ export async function getSession(): Promise<SessionUser | null> {
     const { payload } = await jwtVerify(token, getSessionSecret());
     const session = payload as SessionPayload;
 
-    if (!session.userId || !session.email || !session.name || !session.role) {
+    if (!session.userId || !session.email || !session.name) {
       return null;
     }
 
@@ -83,7 +80,6 @@ export async function getSession(): Promise<SessionUser | null> {
       userId: session.userId,
       email: session.email,
       name: session.name,
-      role: session.role,
     };
   } catch {
     return null;

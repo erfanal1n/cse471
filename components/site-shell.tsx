@@ -4,67 +4,84 @@ import type { ReactNode } from "react";
 import { LogoutButton } from "@/components/logout-button";
 import type { SessionUser } from "@/lib/auth";
 
-const navItems = [
-  { href: "/", label: "Home" },
-  { href: "/signup", label: "Signup" },
-  { href: "/login", label: "Login" },
-  { href: "/dashboard", label: "Dashboard" },
-];
-
 export function SiteShell({
   children,
   currentPath,
   session,
+  pageTitle,
 }: {
   children: ReactNode;
   currentPath: string;
   session: SessionUser | null;
+  pageTitle?: string;
 }) {
+  if (!session) {
+    return (
+      <div className="auth-shell">
+        <div className="auth-shell__frame">
+          <div className="auth-shell__brand">
+            <p className="auth-shell__eyebrow">CSE471</p>
+            <div className="auth-shell__title-panel">
+              <h1>Inventory &amp; Order Management System</h1>
+            </div>
+          </div>
+          <div className="auth-shell__content">{children}</div>
+        </div>
+      </div>
+    );
+  }
+
+  const navItems = [
+    { href: "/", label: "Products", active: currentPath === "/" },
+    { href: "#", label: "Orders", muted: true },
+    { href: "#", label: "Customers", muted: true },
+    { href: "#", label: "Suppliers", muted: true },
+  ];
+
   return (
-    <div className="retro-page">
-      <header className="retro-window">
-        <div className="retro-banner">
-          <div>
-            <p className="retro-kicker">Inventory &amp; Order Management System</p>
-            <h1>CSE471 Inventory Desk</h1>
-            <p>
-              Simple frontend starter with signup, login, logout, and a protected
-              dashboard. More modules can be added on top of this base later.
-            </p>
-          </div>
-          <div className="retro-stamp">
-            <span>{session ? `Signed in as ${session.name}` : "Guest mode"}</span>
-            <span>MongoDB Atlas</span>
-          </div>
+    <div className="dashboard-shell">
+      <aside className="dashboard-sidebar">
+        <div className="dashboard-sidebar__brand">
+          <p>CSE471</p>
+          <h1>Inventory &amp; Order Management System</h1>
         </div>
 
-        <div className="retro-subnav">
-          <nav className="retro-links" aria-label="Primary">
-            {navItems.map((item) => (
+        <nav className="dashboard-sidebar__nav" aria-label="Primary">
+          {navItems.map((item) =>
+            item.muted ? (
+              <span key={item.label} className="dashboard-sidebar__item" data-muted="true">
+                {item.label}
+              </span>
+            ) : (
               <Link
-                key={item.href}
-                className="retro-navlink"
-                data-active={currentPath === item.href}
+                key={item.label}
+                className="dashboard-sidebar__item"
+                data-active={item.active}
                 href={item.href}
               >
                 {item.label}
               </Link>
-            ))}
-          </nav>
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="text-sm text-slate-700">
-              {session ? `${session.role} account` : "No user signed in"}
-            </span>
-            {session ? <LogoutButton /> : null}
+            ),
+          )}
+        </nav>
+
+        <div className="dashboard-sidebar__footer">
+          <div>
+            <strong>{session.name}</strong>
           </div>
+          <LogoutButton />
         </div>
-      </header>
+      </aside>
 
-      <div className="mt-4">{children}</div>
+      <div className="dashboard-main">
+        <header className="dashboard-topbar">
+          <div>
+            <h2>{pageTitle ?? "Products"}</h2>
+          </div>
+        </header>
 
-      <footer className="retro-footer">
-        Auth starter built with Next.js, Prisma, and MongoDB Atlas.
-      </footer>
+        <main className="dashboard-content">{children}</main>
+      </div>
     </div>
   );
 }

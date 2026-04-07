@@ -5,12 +5,6 @@ import { FormEvent, useState, useTransition } from "react";
 
 type AuthMode = "login" | "signup";
 
-const roleOptions = [
-  { label: "Administrator", value: "ADMIN" },
-  { label: "Manager", value: "MANAGER" },
-  { label: "Staff", value: "STAFF" },
-] as const;
-
 const buttonLabel: Record<AuthMode, string> = {
   login: "Sign In",
   signup: "Create Account",
@@ -39,7 +33,6 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
               name: String(formData.get("name") ?? ""),
               email: String(formData.get("email") ?? ""),
               password: String(formData.get("password") ?? ""),
-              role: String(formData.get("role") ?? "STAFF"),
             }
           : {
               email: String(formData.get("email") ?? ""),
@@ -61,7 +54,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
         return;
       }
 
-      router.push("/dashboard");
+      router.push("/");
       router.refresh();
     });
   };
@@ -92,7 +85,7 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
               required
             />
           </div>
-          <div className="retro-field">
+          <div className="retro-field md:col-span-2">
             <label htmlFor="password">Password</label>
             <input
               id="password"
@@ -103,20 +96,6 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
               required
             />
           </div>
-          <div className="retro-field">
-            <label htmlFor="role">Role</label>
-            <select id="role" name="role" defaultValue="STAFF">
-              {roleOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <p className="retro-helper md:col-span-2">
-            The role can be used later for access control on products, orders, suppliers,
-            and admin-only pages.
-          </p>
         </div>
       ) : (
         <div className="retro-form__grid">

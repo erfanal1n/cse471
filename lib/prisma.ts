@@ -1,4 +1,4 @@
-import { PrismaClient } from "@/generated/prisma-client/index.js";
+import { PrismaClient } from "@/generated/prisma-client-v2/index.js";
 
 const globalForPrisma = globalThis as typeof globalThis & {
   prisma?: PrismaClient;
@@ -12,7 +12,11 @@ function createPrismaClient() {
 
 // Dev cache guard
 function hasRequiredDelegates(client: PrismaClient) {
-  return typeof client.product !== "undefined" && typeof client.order !== "undefined";
+  return (
+    typeof client.product !== "undefined" &&
+    typeof client.order !== "undefined" &&
+    typeof client.customer !== "undefined"
+  );
 }
 
 export const prisma =

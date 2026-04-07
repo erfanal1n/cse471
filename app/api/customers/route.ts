@@ -2,19 +2,14 @@ import { NextResponse } from "next/server";
 
 import { Prisma } from "@/generated/prisma-client-v2/index.js";
 import { getSession } from "@/lib/auth";
-import { serializeOrder } from "@/lib/order-management";
-import { buildOrderWriteData, OrderValidationError } from "@/lib/order-write";
+import { serializeCustomer } from "@/lib/customer-directory";
 import { prisma } from "@/lib/prisma";
-import { orderSchema } from "@/lib/validators";
+import { customerSchema } from "@/lib/validators";
 
 function getWriteErrorResponse(error: unknown, fallbackMessage: string) {
-  if (error instanceof OrderValidationError) {
-    return NextResponse.json({ error: error.message }, { status: error.status });
-  }
-
   if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
     return NextResponse.json(
-      { error: "An order with this order number already exists." },
+      { error: "A customer with this phone number already exists." },
       { status: 409 },
     );
   }
@@ -30,23 +25,20 @@ export async function GET() {
   }
 
   try {
-    const orders = await prisma.order.findMany({
-      include: {
-        items: true,
-      },
+    const customers = await prisma.customer.findMany({
       orderBy: {
         updatedAt: "desc",
       },
     });
 
     return NextResponse.json({
-      orders: orders.map(serializeOrder),
+      customers: customers.map(serializeCustomer),
     });
   } catch (error) {
-    console.error("Order list error:", error);
+    console.error("Customer list error:", error);
 
     return NextResponse.json(
-      { error: "Unable to load orders right now." },
+      { error: "Unable to load customers right now." },
       { status: 500 },
     );
   }
@@ -61,38 +53,28 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const parsedBody = orderSchema.safeParse(body);
+    const parsedBody = customerSchema.safeParse(body);
 
     if (!parsedBody.success) {
       return NextResponse.json(
-        { error: parsedBody.error.issues[0]?.message ?? "Enter valid order details." },
+        { error: parsedBody.error.issues[0]?.message ?? "Enter valid customer details." },
         { status: 400 },
       );
     }
 
-    const { orderData, itemData } = await buildOrderWriteData(parsedBody.data);
-
-    const order = await prisma.order.create({
-      data: {
-        ...orderData,
-        items: {
-          create: itemData,
-        },
-      },
-      include: {
-        items: true,
-      },
+    const customer = await prisma.customer.create({
+      data: parsedBody.data,
     });
 
     return NextResponse.json(
       {
-        order: serializeOrder(order),
+        customer: serializeCustomer(customer),
       },
       { status: 201 },
     );
   } catch (error) {
-    console.error("Order create error:", error);
+    console.error("Customer create error:", error);
 
-    return getWriteErrorResponse(error, "Unable to save the order right now.");
+    return getWriteErrorResponse(error, "Unable to save the customer right now.");
   }
 }

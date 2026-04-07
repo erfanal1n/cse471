@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { ORDER_STATUS_OPTIONS } from "@/lib/order-management";
 import { PRODUCT_SIZE_OPTIONS } from "@/lib/product-catalog";
 
 export const registerSchema = z.object({
@@ -55,4 +56,64 @@ export const productSchema = z.object({
     .int("Stock quantity must be a whole number.")
     .min(0, "Stock quantity cannot be negative.")
     .max(1000000, "Stock quantity is too large."),
+});
+
+export const orderItemSchema = z.object({
+  productId: z
+    .string()
+    .trim()
+    .regex(/^[a-f\d]{24}$/i, "Select a valid product."),
+  size: z
+    .string()
+    .trim()
+    .min(1, "Select a size.")
+    .max(30, "Size is too long."),
+  quantity: z
+    .number()
+    .refine((value) => Number.isFinite(value), "Quantity must be a valid number.")
+    .int("Quantity must be a whole number.")
+    .min(1, "Quantity must be at least 1.")
+    .max(1000000, "Quantity is too large."),
+});
+
+export const orderSchema = z.object({
+  orderNumber: z
+    .string()
+    .trim()
+    .min(3, "Order number must be at least 3 characters.")
+    .max(40, "Order number is too long.")
+    .transform((value) => value.toUpperCase()),
+  customerName: z
+    .string()
+    .trim()
+    .min(2, "Customer name must be at least 2 characters.")
+    .max(80, "Customer name is too long."),
+  customerEmail: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .max(120, "Customer email is too long.")
+    .optional()
+    .or(z.literal(""))
+    .transform((value) => value || undefined)
+    .refine((value) => !value || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value), {
+      message: "Enter a valid customer email address.",
+    }),
+  shippingAddress: z
+    .string()
+    .trim()
+    .min(8, "Shipping address must be at least 8 characters.")
+    .max(220, "Shipping address is too long."),
+  notes: z
+    .string()
+    .trim()
+    .max(500, "Notes are too long.")
+    .optional()
+    .or(z.literal(""))
+    .transform((value) => value || undefined),
+  status: z.enum(ORDER_STATUS_OPTIONS),
+  items: z
+    .array(orderItemSchema)
+    .min(1, "Add at least one order item.")
+    .max(25, "An order cannot contain more than 25 items."),
 });

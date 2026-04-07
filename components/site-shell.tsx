@@ -33,7 +33,7 @@ export function SiteShell({
 
   const navItems = [
     { href: "/", label: "Products", active: currentPath === "/" },
-    { href: "#", label: "Orders", muted: true },
+    { href: "/orders", label: "Orders", active: currentPath === "/orders" },
     { href: "#", label: "Customers", muted: true },
     { href: "#", label: "Suppliers", muted: true },
   ];

@@ -227,12 +227,14 @@ export function ProductWorkspace({
         return;
       }
 
+      const savedProduct = data.product;
+
       setProducts((current) => {
         if (editingProductId) {
-          return current.map((item) => (item.id === data.product?.id ? data.product : item));
+          return current.map((item) => (item.id === savedProduct.id ? savedProduct : item));
         }
 
-        return [data.product, ...current];
+        return [savedProduct, ...current];
       });
 
       resetForm();

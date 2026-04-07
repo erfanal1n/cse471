@@ -1,11 +1,18 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../generated/prisma"
+  output   = "../generated/prisma-client"
 }
 
 datasource db {
   provider = "mongodb"
   url      = env("DATABASE_URL")
+}
+
+enum OrderStatus {
+  PENDING
+  SHIPPED
+  DELIVERED
+  CANCELLED
 }
 
 model User {
@@ -30,4 +37,38 @@ model Product {
 
   @@index([category])
   @@index([name])
+}
+
+model Order {
+  id              String      @id @default(auto()) @map("_id") @db.ObjectId
+  orderNumber     String      @unique
+  customerName    String
+  customerEmail   String?
+  shippingAddress String
+  notes           String?
+  status          OrderStatus @default(PENDING)
+  totalItems      Int
+  totalAmount     Float
+  items           OrderItem[]
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  @@index([customerName])
+  @@index([status])
+}
+
+model OrderItem {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  orderId     String   @db.ObjectId
+  productId   String   @db.ObjectId
+  productName String
+  sku         String
+  size        String
+  unitPrice   Float
+  quantity    Int
+  lineTotal   Float
+  order       Order    @relation(fields: [orderId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
 }

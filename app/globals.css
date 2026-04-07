@@ -675,6 +675,200 @@ a {
   border-radius: 10px;
 }
 
+.app-form__field textarea {
+  min-height: 104px;
+  resize: vertical;
+}
+
+.app-form__section {
+  display: grid;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.app-order-builder {
+  border: 1px solid var(--border);
+  background: linear-gradient(180deg, #fbfdff 0%, #f5f9fc 100%);
+  padding: 18px;
+  border-radius: 18px;
+}
+
+.app-order-builder__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  padding-bottom: 18px;
+  border-bottom: 1px solid #e6edf5;
+}
+
+.app-order-builder__top h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.app-order-builder__top p {
+  margin: 6px 0 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.app-order-builder__tools {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.app-order-builder__stats {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.app-order-builder__stat {
+  display: grid;
+  gap: 4px;
+  min-width: 112px;
+  border: 1px solid #d9e4ef;
+  background: #ffffff;
+  padding: 10px 12px;
+  border-radius: 12px;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.04);
+}
+
+.app-order-builder__stat span {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.app-order-builder__stat strong {
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+.app-order-items {
+  display: grid;
+  gap: 16px;
+}
+
+.app-order-item-card {
+  border: 1px solid #d9e4ef;
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 18px;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+}
+
+.app-order-item-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #edf3f8;
+}
+
+.app-order-item-card__title {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+}
+
+.app-order-item-card__index {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 68px;
+  border: 1px solid #cfe0f3;
+  background: #eef5fc;
+  padding: 8px 10px;
+  color: var(--brand-dark);
+  font-size: 0.8rem;
+  font-weight: 700;
+  border-radius: 999px;
+}
+
+.app-order-item-card__header h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.app-order-item-card__header p {
+  margin: 6px 0 0;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+.app-order-item-card__grid {
+  display: grid;
+  gap: 16px;
+}
+
+.app-order-item-card__grid--primary {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.app-order-item-card__grid--secondary {
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.8fr) minmax(0, 0.9fr);
+  margin-top: 16px;
+}
+
+.app-inline-helper {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.app-chip-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  border: 1px solid #d8e1eb;
+  background: #ffffff;
+  padding: 8px 14px;
+  color: var(--text-soft);
+  font-size: 0.88rem;
+  font-weight: 700;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.app-chip-button:hover {
+  background: #f8fbfe;
+}
+
+.app-chip-button--danger {
+  border-color: #f0caca;
+  color: var(--danger);
+}
+
+.app-order-item-card__meta {
+  display: grid;
+  gap: 6px;
+  align-content: center;
+  min-height: 100%;
+  border: 1px solid #d9e4ef;
+  background: linear-gradient(180deg, #f9fbfd 0%, #f2f7fb 100%);
+  padding: 12px 14px;
+  border-radius: 12px;
+}
+
+.app-order-item-card__meta strong {
+  font-size: 1rem;
+}
+
+.app-order-item-card__meta small {
+  color: var(--text-muted);
+  font-size: 0.82rem;
+}
+
 .app-size-grid {
   display: flex;
   flex-wrap: wrap;
@@ -821,6 +1015,15 @@ a {
   gap: 12px;
 }
 
+.app-table__cell-stack {
+  display: grid;
+  gap: 4px;
+}
+
+.app-table__cell-stack span {
+  color: var(--text-muted);
+}
+
 .app-link-button {
   border: 0;
   background: transparent;
@@ -832,6 +1035,62 @@ a {
 
 .app-link-button--danger {
   color: var(--danger);
+}
+
+.app-detail-list {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.app-detail-list li {
+  display: grid;
+  gap: 2px;
+}
+
+.app-detail-list span {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+.app-status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 104px;
+  border: 1px solid transparent;
+  padding: 7px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.app-status-badge[data-status="PENDING"] {
+  border-color: #f3d7a1;
+  background: #fff7e7;
+  color: #9a6700;
+}
+
+.app-status-badge[data-status="SHIPPED"] {
+  border-color: #bfd8ff;
+  background: #eef5ff;
+  color: #2258a8;
+}
+
+.app-status-badge[data-status="DELIVERED"] {
+  border-color: #bfe4cb;
+  background: #edf9f1;
+  color: #157347;
+}
+
+.app-status-badge[data-status="CANCELLED"] {
+  border-color: #f0c2c2;
+  background: #fff1f1;
+  color: #b42318;
 }
 
 .retro-form {
@@ -915,6 +1174,19 @@ a {
   .app-metrics {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .app-order-builder__top {
+    flex-direction: column;
+  }
+
+  .app-order-builder__tools {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .app-order-item-card__grid--secondary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 
 @media (max-width: 960px) {
@@ -971,6 +1243,30 @@ a {
   .app-card__header {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .app-order-builder__tools,
+  .app-order-item-card__header,
+  .app-order-item-card__title {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .app-order-builder__stats {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .app-order-item-card__grid--secondary {
+    grid-template-columns: 1fr;
+  }
+
+  .app-order-builder {
+    padding: 16px;
+  }
+
+  .app-order-builder__stat {
+    width: 100%;
   }
 
   .app-table th,

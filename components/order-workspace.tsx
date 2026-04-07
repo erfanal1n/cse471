@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useMemo, useState, useTransition } from "react";
 
+import { type CustomerDirectoryItem } from "@/lib/customer-directory";
 import {
   formatOrderStatus,
   ORDER_STATUS_OPTIONS,
@@ -21,6 +22,7 @@ type OrderItemFormState = {
 
 type OrderFormState = {
   orderNumber: string;
+  selectedCustomerId: string;
   customerName: string;
   customerEmail: string;
   shippingAddress: string;
@@ -49,6 +51,7 @@ function createEmptyOrderItem(): OrderItemFormState {
 function createEmptyOrderFormState(): OrderFormState {
   return {
     orderNumber: "",
+    selectedCustomerId: "",
     customerName: "",
     customerEmail: "",
     shippingAddress: "",
@@ -73,9 +76,20 @@ function formatDate(value: string) {
   }).format(new Date(value));
 }
 
-function orderToFormState(order: OrderCatalogItem): OrderFormState {
+function orderToFormState(
+  order: OrderCatalogItem,
+  customers: CustomerDirectoryItem[],
+): OrderFormState {
+  const matchedCustomer = customers.find(
+    (customer) =>
+      customer.name.trim().toLowerCase() === order.customerName.trim().toLowerCase() &&
+      customer.deliveryAddress.trim().toLowerCase() ===
+        order.shippingAddress.trim().toLowerCase(),
+  );
+
   return {
     orderNumber: order.orderNumber,
+    selectedCustomerId: matchedCustomer?.id ?? "",
     customerName: order.customerName,
     customerEmail: order.customerEmail ?? "",
     shippingAddress: order.shippingAddress,
@@ -91,9 +105,11 @@ function orderToFormState(order: OrderCatalogItem): OrderFormState {
 }
 
 export function OrderWorkspace({
+  initialCustomers,
   initialOrders,
   initialProducts,
 }: {
+  initialCustomers: CustomerDirectoryItem[];
   initialOrders: OrderCatalogItem[];
   initialProducts: ProductCatalogItem[];
 }) {
@@ -114,8 +130,17 @@ export function OrderWorkspace({
     () => [...initialProducts].sort((left, right) => left.name.localeCompare(right.name)),
     [initialProducts],
   );
+  const customersById = useMemo(
+    () => new Map(initialCustomers.map((customer) => [customer.id, customer])),
+    [initialCustomers],
+  );
+  const customerOptions = useMemo(
+    () => [...initialCustomers].sort((left, right) => left.name.localeCompare(right.name)),
+    [initialCustomers],
+  );
 
   const hasProducts = productOptions.length > 0;
+  const selectedCustomer = customersById.get(formState.selectedCustomerId);
 
   const metrics = useMemo(() => {
     const totalOrders = orders.length;
@@ -195,6 +220,17 @@ export function OrderWorkspace({
     }));
   };
 
+  const handleCustomerSelect = (customerId: string) => {
+    const selected = customersById.get(customerId);
+
+    setFormState((current) => ({
+      ...current,
+      selectedCustomerId: customerId,
+      customerName: selected ? selected.name : current.customerName,
+      shippingAddress: selected ? selected.deliveryAddress : current.shippingAddress,
+    }));
+  };
+
   const handleItemChange = (
     rowId: string,
     field: keyof Omit<OrderItemFormState, "rowId">,
@@ -255,7 +291,7 @@ export function OrderWorkspace({
     setErrorMessage("");
     setFeedbackMessage("");
     setEditingOrderId(order.id);
-    setFormState(orderToFormState(order));
+    setFormState(orderToFormState(order, initialCustomers));
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -411,6 +447,49 @@ export function OrderWorkspace({
             </label>
 
             <label className="app-form__field">
+              <span>Status</span>
+              <select
+                onChange={(event) =>
+                  handleInputChange("status", event.target.value as OrderStatusValue)
+                }
+                value={formState.status}
+              >
+                {ORDER_STATUS_OPTIONS.map((status) => (
+                  <option key={status} value={status}>
+                    {formatOrderStatus(status)}
+                  </option>
+                ))}
+              </select>
+            </label>
+            {customerOptions.length > 0 ? (
+              <label className="app-form__field app-form__field--full">
+                <span>Saved Customer</span>
+                <select
+                  onChange={(event) => handleCustomerSelect(event.target.value)}
+                  value={formState.selectedCustomerId}
+                >
+                  <option value="">Manual entry</option>
+                  {customerOptions.map((customer) => (
+                    <option key={customer.id} value={customer.id}>
+                      {customer.name} ({customer.phone})
+                    </option>
+                  ))}
+                </select>
+
+                {selectedCustomer ? (
+                  <div className="app-customer-quicklook">
+                    <span className="app-customer-pill">{selectedCustomer.phone}</span>
+                    <span className="app-customer-quicklook__address">
+                      {selectedCustomer.deliveryAddress}
+                    </span>
+                  </div>
+                ) : null}
+              </label>
+            ) : null}
+          </div>
+
+          <div className="app-form__grid">
+            <label className="app-form__field">
               <span>Customer Name</span>
               <input
                 onChange={(event) => handleInputChange("customerName", event.target.value)}
@@ -428,22 +507,6 @@ export function OrderWorkspace({
                 type="email"
                 value={formState.customerEmail}
               />
-            </label>
-
-            <label className="app-form__field">
-              <span>Status</span>
-              <select
-                onChange={(event) =>
-                  handleInputChange("status", event.target.value as OrderStatusValue)
-                }
-                value={formState.status}
-              >
-                {ORDER_STATUS_OPTIONS.map((status) => (
-                  <option key={status} value={status}>
-                    {formatOrderStatus(status)}
-                  </option>
-                ))}
-              </select>
             </label>
           </div>
 

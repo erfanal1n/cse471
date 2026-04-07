@@ -2,13 +2,13 @@ import { NextResponse } from "next/server";
 
 import { Prisma } from "@/generated/prisma-client-v2/index.js";
 import { getSession } from "@/lib/auth";
-import { serializeProduct } from "@/lib/product-catalog";
+import { serializeCustomer } from "@/lib/customer-directory";
 import { prisma } from "@/lib/prisma";
-import { productSchema } from "@/lib/validators";
+import { customerSchema } from "@/lib/validators";
 
 type RouteContext = {
   params: Promise<{
-    productId: string;
+    customerId: string;
   }>;
 };
 
@@ -20,13 +20,13 @@ function getWriteErrorResponse(error: unknown, fallbackMessage: string) {
   if (error instanceof Prisma.PrismaClientKnownRequestError) {
     if (error.code === "P2002") {
       return NextResponse.json(
-        { error: "A product with this SKU already exists." },
+        { error: "A customer with this phone number already exists." },
         { status: 409 },
       );
     }
 
     if (error.code === "P2025") {
-      return NextResponse.json({ error: "Product not found." }, { status: 404 });
+      return NextResponse.json({ error: "Customer not found." }, { status: 404 });
     }
   }
 
@@ -40,37 +40,37 @@ export async function PATCH(request: Request, context: RouteContext) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 
-  const { productId } = await context.params;
+  const { customerId } = await context.params;
 
-  if (!isValidObjectId(productId)) {
-    return NextResponse.json({ error: "Invalid product id." }, { status: 400 });
+  if (!isValidObjectId(customerId)) {
+    return NextResponse.json({ error: "Invalid customer id." }, { status: 400 });
   }
 
   try {
     const body = await request.json();
-    const parsedBody = productSchema.safeParse(body);
+    const parsedBody = customerSchema.safeParse(body);
 
     if (!parsedBody.success) {
       return NextResponse.json(
-        { error: parsedBody.error.issues[0]?.message ?? "Enter valid product details." },
+        { error: parsedBody.error.issues[0]?.message ?? "Enter valid customer details." },
         { status: 400 },
       );
     }
 
-    const product = await prisma.product.update({
+    const customer = await prisma.customer.update({
       where: {
-        id: productId,
+        id: customerId,
       },
       data: parsedBody.data,
     });
 
     return NextResponse.json({
-      product: serializeProduct(product),
+      customer: serializeCustomer(customer),
     });
   } catch (error) {
-    console.error("Product update error:", error);
+    console.error("Customer update error:", error);
 
-    return getWriteErrorResponse(error, "Unable to update the product right now.");
+    return getWriteErrorResponse(error, "Unable to update the customer right now.");
   }
 }
 
@@ -81,23 +81,23 @@ export async function DELETE(_: Request, context: RouteContext) {
     return NextResponse.json({ error: "Unauthorized." }, { status: 401 });
   }
 
-  const { productId } = await context.params;
+  const { customerId } = await context.params;
 
-  if (!isValidObjectId(productId)) {
-    return NextResponse.json({ error: "Invalid product id." }, { status: 400 });
+  if (!isValidObjectId(customerId)) {
+    return NextResponse.json({ error: "Invalid customer id." }, { status: 400 });
   }
 
   try {
-    await prisma.product.delete({
+    await prisma.customer.delete({
       where: {
-        id: productId,
+        id: customerId,
       },
     });
 
     return NextResponse.json({ ok: true });
   } catch (error) {
-    console.error("Product delete error:", error);
+    console.error("Customer delete error:", error);
 
-    return getWriteErrorResponse(error, "Unable to delete the product right now.");
+    return getWriteErrorResponse(error, "Unable to delete the customer right now.");
   }
 }

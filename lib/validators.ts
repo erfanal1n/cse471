@@ -117,3 +117,22 @@ export const orderSchema = z.object({
     .min(1, "Add at least one order item.")
     .max(25, "An order cannot contain more than 25 items."),
 });
+
+export const customerSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, "Customer name must be at least 2 characters.")
+    .max(80, "Customer name is too long."),
+  phone: z
+    .string()
+    .trim()
+    .min(7, "Phone number must be at least 7 digits.")
+    .max(20, "Phone number is too long.")
+    .regex(/^\+?[0-9()\-\s]+$/, "Enter a valid phone number."),
+  deliveryAddress: z
+    .string()
+    .trim()
+    .min(8, "Delivery address must be at least 8 characters.")
+    .max(220, "Delivery address is too long."),
+});

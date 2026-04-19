@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { Prisma } from "@/generated/prisma-client-v2/index.js";
 import { getSession } from "@/lib/auth";
+import { sendDeliveryReceiptEmail } from "@/lib/email-service";
 import { serializeOrder } from "@/lib/order-management";
 import {
   buildOrderWriteData,
@@ -64,6 +65,12 @@ export async function PATCH(request: Request, context: RouteContext) {
 
     const { orderData, itemData } = await buildOrderWriteData(parsedBody.data);
 
+    const existingOrder = await prisma.order.findUnique({
+      where: {
+        id: orderId,
+      },
+    });
+
     const order = await prisma.order.update({
       where: {
         id: orderId,
@@ -79,6 +86,15 @@ export async function PATCH(request: Request, context: RouteContext) {
         items: true,
       },
     });
+
+    console.log(`[Order PATCH] orderId=${orderId} | previousStatus=${existingOrder?.status} | newStatus=${order.status}`);
+
+    if (existingOrder && existingOrder.status !== "DELIVERED" && order.status === "DELIVERED") {
+      console.log(`[Order PATCH] Status transitioned to DELIVERED. Sending receipt to ${order.customerEmail}...`);
+      await sendDeliveryReceiptEmail(serializeOrder(order));
+    } else if (order.status === "DELIVERED") {
+      console.log(`[Order PATCH] Order was already DELIVERED. Skipping receipt email.`);
+    }
 
     return NextResponse.json({
       order: serializeOrder(order),

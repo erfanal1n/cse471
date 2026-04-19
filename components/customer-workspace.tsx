@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useMemo, useState, useTransition } from "react";
 
 import { type CustomerDirectoryItem } from "@/lib/customer-directory";
+import { DeliveryMap } from "@/components/delivery-map";
 
 type CustomerFormState = {
   name: string;
@@ -277,6 +278,10 @@ export function CustomerWorkspace({
               value={formState.deliveryAddress}
             />
           </label>
+
+          {formState.deliveryAddress.trim() ? (
+            <DeliveryMap address={formState.deliveryAddress} />
+          ) : null}
 
           {errorMessage ? <p className="app-alert app-alert--error">{errorMessage}</p> : null}
           {feedbackMessage ? (

@@ -61,12 +61,35 @@ export function ProductWorkspace({
   initialProducts: ProductCatalogItem[];
 }) {
   const router = useRouter();
-  const [products, setProducts] = useState(initialProducts);
+  const [products, setProducts] = useState<ProductCatalogItem[]>(initialProducts);
   const [formState, setFormState] = useState<ProductFormState>(createEmptyFormState);
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [isPending, startTransition] = useTransition();
+
+  const [isForecastModalOpen, setIsForecastModalOpen] = useState(false);
+  const [forecastData, setForecastData] = useState<{
+    aiPowered: boolean;
+    targetName: string;
+    predictedSales: number;
+    recommendation: string;
+    error?: string;
+  } | null>(null);
+
+  const openForecastModal = (product: ProductCatalogItem) => {
+    startTransition(async () => {
+      setErrorMessage("");
+      const response = await fetch(`/api/forecast/${product.id}`);
+      const data = await response.json();
+      if (!response.ok) {
+        setErrorMessage(data?.error ?? "Unable to forecast");
+        return;
+      }
+      setForecastData(data);
+      setIsForecastModalOpen(true);
+    });
+  };
 
   const metrics = useMemo(() => {
     const totalProducts = products.length;
@@ -436,6 +459,15 @@ export function ProductWorkspace({
                         >
                           Delete
                         </button>
+                        <button
+                          className="app-link-button"
+                          style={{ color: "#8b5cf6" }}
+                          disabled={isPending}
+                          onClick={() => openForecastModal(product)}
+                          type="button"
+                        >
+                          Forecast
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -445,6 +477,38 @@ export function ProductWorkspace({
           </div>
         )}
       </section>
+
+      {isForecastModalOpen && forecastData && (
+        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 50 }}>
+          <div style={{ background: "white", padding: "24px", borderRadius: "8px", boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)", width: "500px", maxWidth: "90%" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+              <h2 style={{ fontSize: "1.125rem", fontWeight: 500, margin: 0 }}>AI Demand Forecast</h2>
+              <button 
+                onClick={() => setIsForecastModalOpen(false)}
+                style={{ background: "none", border: "1px solid #e5e7eb", borderRadius: "4px", padding: "4px 8px", cursor: "pointer" }}
+              >✕</button>
+            </div>
+            
+            <div style={{ marginBottom: "16px" }}>
+              <span style={{ display: "inline-flex", background: "#f3e8ff", color: "#7e22ce", padding: "4px 12px", borderRadius: "9999px", fontSize: "0.75rem", fontWeight: 600 }}>
+                ✨ Powered by HuggingFace AI (Mistral-7B)
+              </span>
+            </div>
+
+            <div style={{ background: "#e4e7fa", padding: "24px", borderRadius: "8px" }}>
+              <div style={{ fontWeight: "bold", marginBottom: "16px", color: "#1f2937" }}>
+                Target: {forecastData.targetName}
+              </div>
+              <div style={{ color: "#ef4444", fontWeight: "bold", fontSize: "1.125rem", marginBottom: "16px" }}>
+                Predicted Sales (Next 30 Days): {forecastData.predictedSales} Units
+              </div>
+              <div style={{ fontSize: "0.875rem", fontStyle: "italic", color: "#4b5563" }}>
+                Recommendation: {forecastData.recommendation}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

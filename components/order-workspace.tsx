@@ -12,6 +12,7 @@ import {
   type OrderStatusValue,
 } from "@/lib/order-management";
 import { type ProductCatalogItem } from "@/lib/product-catalog";
+import { DeliveryMap } from "@/components/delivery-map";
 
 type OrderItemFormState = {
   rowId: string;
@@ -520,6 +521,10 @@ export function OrderWorkspace({
               value={formState.shippingAddress}
             />
           </label>
+
+          {formState.shippingAddress.trim() ? (
+            <DeliveryMap address={formState.shippingAddress} />
+          ) : null}
 
           <label className="app-form__field">
             <span>Notes</span>

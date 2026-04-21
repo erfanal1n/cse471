@@ -199,6 +199,18 @@ export function OrderWorkspace({
     });
   }, [orders, filterStatus, sortOrder]);
 
+  const exportOrdersCSV = () => {
+    const header = "Order,Customer Name,Customer Email,Status,Items Count,Total Amount,Updated At\n";
+    const rows = sortedOrders.map(o => `"${o.orderNumber}","${o.customerName}","${o.customerEmail ?? ''}","${o.status}","${o.totalItems}","${o.totalAmount}","${new Date(o.updatedAt).toLocaleDateString()}"`).join("\n");
+    const blob = new Blob([header + rows], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `orders-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
+
   const resetForm = () => {
     setFormState(createEmptyOrderFormState());
     setEditingOrderId(null);
@@ -723,6 +735,15 @@ export function OrderWorkspace({
                 : `${sortedOrders.length} of ${orders.length} records`}
             </p>
           </div>
+          {sortedOrders.length > 0 && (
+            <button
+              className="app-button app-button--secondary"
+              onClick={exportOrdersCSV}
+              type="button"
+            >
+              Export CSV
+            </button>
+          )}
         </div>
 
         {/* ── Filter toolbar ── */}

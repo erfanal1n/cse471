@@ -120,6 +120,8 @@ export function OrderWorkspace({
   const [editingOrderId, setEditingOrderId] = useState<string | null>(null);
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [filterStatus, setFilterStatus] = useState<string>("");
+  const [sortOrder, setSortOrder] = useState<"desc" | "asc">("desc");
   const [isPending, startTransition] = useTransition();
 
   const productsById = useMemo(
@@ -147,15 +149,15 @@ export function OrderWorkspace({
     const totalOrders = orders.length;
     const pendingOrders = orders.filter((order) => order.status === "PENDING").length;
     const totalUnits = orders.reduce((sum, order) => sum + order.totalItems, 0);
-    const bookedValue = orders
-      .filter((order) => order.status !== "CANCELLED")
+    const deliveredRevenue = orders
+      .filter((order) => order.status === "DELIVERED")
       .reduce((sum, order) => sum + order.totalAmount, 0);
 
     return {
       totalOrders,
       pendingOrders,
       totalUnits,
-      bookedValue,
+      deliveredRevenue,
     };
   }, [orders]);
 
@@ -186,14 +188,16 @@ export function OrderWorkspace({
     };
   }, [formState.items, productsById]);
 
-  const sortedOrders = useMemo(
-    () =>
-      [...orders].sort(
-        (left, right) =>
-          new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime(),
-      ),
-    [orders],
-  );
+  const sortedOrders = useMemo(() => {
+    const filtered = filterStatus
+      ? orders.filter((order) => order.status === filterStatus)
+      : orders;
+
+    return [...filtered].sort((left, right) => {
+      const diff = new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime();
+      return sortOrder === "desc" ? diff : -diff;
+    });
+  }, [orders, filterStatus, sortOrder]);
 
   const resetForm = () => {
     setFormState(createEmptyOrderFormState());
@@ -412,8 +416,8 @@ export function OrderWorkspace({
           <strong className="app-metric-card__value">{metrics.totalUnits}</strong>
         </div>
         <div className="app-metric-card">
-          <span className="app-metric-card__label">Booked Value</span>
-          <strong className="app-metric-card__value">{formatCurrency(metrics.bookedValue)}</strong>
+          <span className="app-metric-card__label">Delivered Revenue</span>
+          <strong className="app-metric-card__value">{formatCurrency(metrics.deliveredRevenue)}</strong>
         </div>
       </section>
 
@@ -713,7 +717,41 @@ export function OrderWorkspace({
         <div className="app-card__header">
           <div>
             <h2>Orders</h2>
-            <p>{sortedOrders.length} records</p>
+            <p>
+              {sortedOrders.length === orders.length
+                ? `${orders.length} records`
+                : `${sortedOrders.length} of ${orders.length} records`}
+            </p>
+          </div>
+        </div>
+
+        {/* ── Filter toolbar ── */}
+        <div className="app-product-filters">
+          <div className="app-product-filters__search-wrap" style={{ flex: "none", minWidth: 0, display: "flex", alignItems: "center" }}>
+            <span style={{ fontSize: "0.9rem", color: "var(--text-soft)", fontWeight: 600, marginRight: "8px" }}>Status:</span>
+            <select
+              style={{ padding: "6px 14px", borderRadius: "8px", border: "1px solid var(--border-strong)", background: "#ffffff" }}
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+            >
+              <option value="">All Statuses</option>
+              {ORDER_STATUS_OPTIONS.map((status) => (
+                <option key={status} value={status}>
+                  {formatOrderStatus(status)}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div className="app-product-filters__search-wrap" style={{ flex: "none", minWidth: 0, display: "flex", alignItems: "center" }}>
+            <span style={{ fontSize: "0.9rem", color: "var(--text-soft)", fontWeight: 600, marginRight: "8px" }}>Sort:</span>
+            <select
+              style={{ padding: "6px 14px", borderRadius: "8px", border: "1px solid var(--border-strong)", background: "#ffffff" }}
+              value={sortOrder}
+              onChange={(e) => setSortOrder(e.target.value as "desc" | "asc")}
+            >
+              <option value="desc">Newest First</option>
+              <option value="asc">Oldest First</option>
+            </select>
           </div>
         </div>
 

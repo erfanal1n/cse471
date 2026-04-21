@@ -37,8 +37,10 @@ function customerToFormState(customer: CustomerDirectoryItem): CustomerFormState
 
 export function CustomerWorkspace({
   initialCustomers,
+  topCustomerInfo,
 }: {
   initialCustomers: CustomerDirectoryItem[];
+  topCustomerInfo?: { name: string; count: number } | null;
 }) {
   const router = useRouter();
   const [metricsReferenceTime] = useState(() => Date.now());
@@ -87,6 +89,18 @@ export function CustomerWorkspace({
       ),
     [customers],
   );
+
+  const exportCustomersCSV = () => {
+    const header = "Name,Phone,Delivery Address,Created At,Updated At\n";
+    const rows = sortedCustomers.map(c => `"${c.name}","${c.phone}","${c.deliveryAddress}","${new Date(c.createdAt).toLocaleDateString()}","${new Date(c.updatedAt).toLocaleDateString()}"`).join("\n");
+    const blob = new Blob([header + rows], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `customers-${new Date().toISOString().slice(0,10)}.csv`;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  };
 
   const resetForm = () => {
     setFormState(createEmptyFormState());
@@ -225,6 +239,14 @@ export function CustomerWorkspace({
           <span className="app-metric-card__label">Address Areas</span>
           <strong className="app-metric-card__value">{metrics.uniqueAreaCount}</strong>
         </div>
+        <div className="app-metric-card">
+          <span className="app-metric-card__label">Top Customer</span>
+          <strong className="app-metric-card__value" style={{ fontSize: "1.2rem", marginTop: "18px" }}>
+            {topCustomerInfo ? (
+              <span title={`${topCustomerInfo.count} orders`}>{topCustomerInfo.name}</span>
+            ) : "N/A"}
+          </strong>
+        </div>
       </section>
 
       <section className="app-card">
@@ -308,6 +330,15 @@ export function CustomerWorkspace({
             <h2>Customer Directory</h2>
             <p>{sortedCustomers.length} records</p>
           </div>
+          {sortedCustomers.length > 0 && (
+            <button
+              className="app-button app-button--secondary"
+              onClick={exportCustomersCSV}
+              type="button"
+            >
+              Export CSV
+            </button>
+          )}
         </div>
 
         {sortedCustomers.length === 0 ? (

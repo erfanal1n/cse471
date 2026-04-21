@@ -66,6 +66,8 @@ export function ProductWorkspace({
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeCategory, setActiveCategory] = useState("");
   const [isPending, startTransition] = useTransition();
 
   const [isForecastModalOpen, setIsForecastModalOpen] = useState(false);
@@ -116,6 +118,16 @@ export function ProductWorkspace({
       ),
     [products],
   );
+
+  const filteredProducts = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
+    return sortedProducts.filter((p) => {
+      const matchesSearch =
+        !q || p.name.toLowerCase().includes(q) || p.sku.toLowerCase().includes(q);
+      const matchesCategory = !activeCategory || p.category === activeCategory;
+      return matchesSearch && matchesCategory;
+    });
+  }, [sortedProducts, searchQuery, activeCategory]);
 
   const categoryOptions = useMemo(() => {
     const seen = new Set<string>();
@@ -407,7 +419,39 @@ export function ProductWorkspace({
         <div className="app-card__header">
           <div>
             <h2>Products</h2>
-            <p>{sortedProducts.length} items</p>
+            <p>
+              {filteredProducts.length === sortedProducts.length
+                ? `${sortedProducts.length} items`
+                : `${filteredProducts.length} of ${sortedProducts.length} items`}
+            </p>
+          </div>
+        </div>
+
+        {/* ── Filter toolbar ── */}
+        <div className="app-product-filters">
+          <div className="app-product-filters__search-wrap">
+            <svg className="app-product-filters__search-icon" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input
+              className="app-product-filters__search"
+              type="search"
+              placeholder="Search by name or SKU…"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <div className="app-product-filters__cats">
+            {["", ...categoryOptions].map((cat) => (
+              <button
+                key={cat || "__all"}
+                type="button"
+                className={`app-product-filters__cat-btn${
+                  activeCategory === cat ? " app-product-filters__cat-btn--active" : ""
+                }`}
+                onClick={() => setActiveCategory(cat)}
+              >
+                {cat || "All"}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -415,6 +459,11 @@ export function ProductWorkspace({
           <div className="app-empty-state">
             <h3>No products yet</h3>
             <p>Add the first product using the form above.</p>
+          </div>
+        ) : filteredProducts.length === 0 ? (
+          <div className="app-empty-state">
+            <h3>No matching products</h3>
+            <p>Try adjusting your search or category filter.</p>
           </div>
         ) : (
           <div className="app-table-wrap">
@@ -432,7 +481,7 @@ export function ProductWorkspace({
                 </tr>
               </thead>
               <tbody>
-                {sortedProducts.map((product) => (
+                {filteredProducts.map((product) => (
                   <tr key={product.id}>
                     <td>{product.name}</td>
                     <td>{product.sku}</td>

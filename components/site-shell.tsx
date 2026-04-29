@@ -32,12 +32,12 @@ export function SiteShell({
   }
 
   const navItems = [
-    { href: "/", label: "Products", active: currentPath === "/" },
-    { href: "/orders", label: "Orders", active: currentPath === "/orders" },
-    { href: "/customers", label: "Customers", active: currentPath === "/customers" },
-    { href: "/qrcode", label: "QR Generator", active: currentPath === "/qrcode" },
-    { href: "/suppliers", label: "Suppliers", active: currentPath === "/suppliers" },
-    { href: "/analytics", label: "Analytics", active: currentPath === "/analytics" },
+    { href: "/", label: "Products", active: currentPath === "/", muted: false },
+    { href: "/orders", label: "Orders", active: currentPath === "/orders", muted: false },
+    { href: "/customers", label: "Customers", active: currentPath === "/customers", muted: false },
+    { href: "/qrcode", label: "QR Generator", active: currentPath === "/qrcode", muted: false },
+    { href: "/suppliers", label: "Suppliers", active: currentPath === "/suppliers", muted: false },
+    { href: "/analytics", label: "Analytics", active: currentPath === "/analytics", muted: false },
   ];
 
   return (

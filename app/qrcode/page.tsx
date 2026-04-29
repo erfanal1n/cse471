@@ -36,6 +36,7 @@ export default async function QRCodePage() {
       name: true,
       sku: true,
       category: true,
+      sizes: true,
       price: true,
       stockQuantity: true,
       createdAt: true,

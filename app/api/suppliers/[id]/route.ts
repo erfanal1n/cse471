@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { Prisma } from "@/generated/prisma-client-v2/index.js";
+import { Prisma } from "@prisma/client";
 import { getSession } from "@/lib/auth";
 import { serializeSupplier } from "@/lib/supplier-management";
 import { prisma } from "@/lib/prisma";

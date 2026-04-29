@@ -1,18 +1,18 @@
 import Link from "next/link";
 
 import { AuthForm } from "@/components/auth-form";
-import { ProductWorkspace } from "@/components/product-workspace";
 import { SiteShell } from "@/components/site-shell";
+import { SupplierWorkspace } from "@/components/supplier-workspace";
 import { getSession } from "@/lib/auth";
-import { serializeProduct } from "@/lib/product-catalog";
 import { prisma } from "@/lib/prisma";
+import { serializeSupplier } from "@/lib/supplier-management";
 
-export default async function Home() {
+export default async function SuppliersPage() {
   const session = await getSession();
 
   if (!session) {
     return (
-      <SiteShell currentPath="/" session={session}>
+      <SiteShell currentPath="/suppliers" session={session}>
         <main className="auth-panel">
           <section className="auth-card">
             <div className="auth-card__header">
@@ -30,10 +30,10 @@ export default async function Home() {
     );
   }
 
-  const products = await prisma.product.findMany({
+  const suppliers = await prisma.supplier.findMany({
     include: {
-      supplier: {
-        select: { name: true },
+      products: {
+        select: { id: true, name: true, sku: true },
       },
     },
     orderBy: {
@@ -41,20 +41,16 @@ export default async function Home() {
     },
   });
 
-  const suppliers = await prisma.supplier.findMany({
-    select: { id: true, name: true },
+  const products = await prisma.product.findMany({
+    select: { id: true, name: true, sku: true },
     orderBy: { name: "asc" },
   });
 
   return (
-    <SiteShell
-      currentPath="/"
-      pageTitle="Products"
-      session={session}
-    >
-      <ProductWorkspace 
-        initialProducts={products.map(serializeProduct)} 
-        suppliers={suppliers}
+    <SiteShell currentPath="/suppliers" pageTitle="Suppliers" session={session}>
+      <SupplierWorkspace 
+        initialSuppliers={suppliers.map(serializeSupplier)} 
+        availableProducts={products}
       />
     </SiteShell>
   );

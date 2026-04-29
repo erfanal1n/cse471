@@ -1,18 +1,18 @@
 import Link from "next/link";
 
 import { AuthForm } from "@/components/auth-form";
-import { ProductWorkspace } from "@/components/product-workspace";
 import { SiteShell } from "@/components/site-shell";
+import { AnalyticsWorkspace } from "@/components/analytics-workspace";
 import { getSession } from "@/lib/auth";
-import { serializeProduct } from "@/lib/product-catalog";
 import { prisma } from "@/lib/prisma";
+import { serializeProduct } from "@/lib/product-catalog";
 
-export default async function Home() {
+export default async function AnalyticsPage() {
   const session = await getSession();
 
   if (!session) {
     return (
-      <SiteShell currentPath="/" session={session}>
+      <SiteShell currentPath="/analytics" session={session}>
         <main className="auth-panel">
           <section className="auth-card">
             <div className="auth-card__header">
@@ -31,31 +31,14 @@ export default async function Home() {
   }
 
   const products = await prisma.product.findMany({
-    include: {
-      supplier: {
-        select: { name: true },
-      },
-    },
     orderBy: {
-      updatedAt: "desc",
+      category: "asc",
     },
-  });
-
-  const suppliers = await prisma.supplier.findMany({
-    select: { id: true, name: true },
-    orderBy: { name: "asc" },
   });
 
   return (
-    <SiteShell
-      currentPath="/"
-      pageTitle="Products"
-      session={session}
-    >
-      <ProductWorkspace 
-        initialProducts={products.map(serializeProduct)} 
-        suppliers={suppliers}
-      />
+    <SiteShell currentPath="/analytics" pageTitle="Inventory Analytics" session={session}>
+      <AnalyticsWorkspace products={products.map(serializeProduct)} />
     </SiteShell>
   );
 }

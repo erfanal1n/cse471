@@ -56,6 +56,13 @@ export const productSchema = z.object({
     .int("Stock quantity must be a whole number.")
     .min(0, "Stock quantity cannot be negative.")
     .max(1000000, "Stock quantity is too large."),
+  supplierId: z
+    .string()
+    .trim()
+    .regex(/^[a-f\d]{24}$/i, "Select a valid supplier.")
+    .optional()
+    .or(z.literal(""))
+    .transform((value) => value || undefined),
 });
 
 export const orderItemSchema = z.object({
@@ -135,4 +142,50 @@ export const customerSchema = z.object({
     .trim()
     .min(8, "Delivery address must be at least 8 characters.")
     .max(220, "Delivery address is too long."),
+});
+
+export const supplierSchema = z.object({
+  name: z
+    .string()
+    .trim()
+    .min(2, "Supplier name must be at least 2 characters.")
+    .max(100, "Supplier name is too long."),
+  contactPerson: z
+    .string()
+    .trim()
+    .max(80, "Contact person name is too long.")
+    .optional()
+    .or(z.literal(""))
+    .transform((value) => value || undefined),
+  email: z
+    .string()
+    .trim()
+    .toLowerCase()
+    .max(120, "Email address is too long.")
+    .optional()
+    .or(z.literal(""))
+    .transform((value) => value || undefined)
+    .refine((value) => !value || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value), {
+      message: "Enter a valid email address.",
+    }),
+  phone: z
+    .string()
+    .trim()
+    .min(7, "Phone number must be at least 7 digits.")
+    .max(20, "Phone number is too long.")
+    .regex(/^\+?[0-9()\-\s]+$/, "Enter a valid phone number.")
+    .optional()
+    .or(z.literal(""))
+    .transform((value) => value || undefined),
+  address: z
+    .string()
+    .trim()
+    .max(220, "Address is too long.")
+    .optional()
+    .or(z.literal(""))
+    .transform((value) => value || undefined),
+  productIds: z
+    .array(z.string().regex(/^[a-f\d]{24}$/i, "Invalid product ID"))
+    .max(2, "You can select at most 2 products.")
+    .optional(),
 });

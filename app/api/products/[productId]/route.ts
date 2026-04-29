@@ -62,6 +62,11 @@ export async function PATCH(request: Request, context: RouteContext) {
         id: productId,
       },
       data: parsedBody.data,
+      include: {
+        supplier: {
+          select: { name: true },
+        },
+      },
     });
 
     return NextResponse.json({

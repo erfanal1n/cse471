@@ -16,6 +16,7 @@ type ProductFormState = {
   sizes: string[];
   price: string;
   stockQuantity: string;
+  supplierId: string;
 };
 
 function createEmptyFormState(): ProductFormState {
@@ -26,6 +27,7 @@ function createEmptyFormState(): ProductFormState {
     sizes: [],
     price: "",
     stockQuantity: "",
+    supplierId: "",
   };
 }
 
@@ -52,13 +54,16 @@ function productToFormState(product: ProductCatalogItem): ProductFormState {
     sizes: [...product.sizes],
     price: String(product.price),
     stockQuantity: String(product.stockQuantity),
+    supplierId: product.supplierId ?? "",
   };
 }
 
 export function ProductWorkspace({
   initialProducts,
+  suppliers = [],
 }: {
   initialProducts: ProductCatalogItem[];
+  suppliers?: { id: string; name: string }[];
 }) {
   const router = useRouter();
   const [products, setProducts] = useState<ProductCatalogItem[]>(initialProducts);
@@ -236,6 +241,7 @@ export function ProductWorkspace({
         sizes: formState.sizes,
         price: Number(formState.price),
         stockQuantity: Number(formState.stockQuantity),
+        supplierId: formState.supplierId || undefined,
       };
 
       const response = await fetch(
@@ -378,6 +384,21 @@ export function ProductWorkspace({
                 value={formState.stockQuantity}
               />
             </label>
+
+            <label className="app-form__field">
+              <span>Supplier</span>
+              <select
+                onChange={(event) => handleInputChange("supplierId", event.target.value)}
+                value={formState.supplierId}
+              >
+                <option value="">Select supplier (optional)</option>
+                {suppliers.map((supplier) => (
+                  <option key={supplier.id} value={supplier.id}>
+                    {supplier.name}
+                  </option>
+                ))}
+              </select>
+            </label>
           </div>
 
           <div className="app-form__field">
@@ -473,6 +494,7 @@ export function ProductWorkspace({
                   <th>Product</th>
                   <th>SKU</th>
                   <th>Category</th>
+                  <th>Supplier</th>
                   <th>Sizes</th>
                   <th>Price</th>
                   <th>Stock</th>
@@ -486,6 +508,7 @@ export function ProductWorkspace({
                     <td>{product.name}</td>
                     <td>{product.sku}</td>
                     <td>{product.category}</td>
+                    <td>{product.supplierName || <span style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>None</span>}</td>
                     <td>{product.sizes.join(", ")}</td>
                     <td>{formatCurrency(product.price)}</td>
                     <td>{product.stockQuantity}</td>

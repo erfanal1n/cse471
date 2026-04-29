@@ -1,18 +1,18 @@
 import Link from "next/link";
 
 import { AuthForm } from "@/components/auth-form";
-import { ProductWorkspace } from "@/components/product-workspace";
+import { QRWorkspace } from "@/components/qr-workspace";
 import { SiteShell } from "@/components/site-shell";
 import { getSession } from "@/lib/auth";
-import { serializeProduct } from "@/lib/product-catalog";
 import { prisma } from "@/lib/prisma";
+import { serializeProduct } from "@/lib/product-catalog";
 
-export default async function Home() {
+export default async function QRCodePage() {
   const session = await getSession();
 
   if (!session) {
     return (
-      <SiteShell currentPath="/" session={session}>
+      <SiteShell currentPath="/qrcode" session={session}>
         <main className="auth-panel">
           <section className="auth-card">
             <div className="auth-card__header">
@@ -31,31 +31,29 @@ export default async function Home() {
   }
 
   const products = await prisma.product.findMany({
-    include: {
-      supplier: {
-        select: { name: true },
-      },
+    select: {
+      id: true,
+      name: true,
+      sku: true,
+      category: true,
+      price: true,
+      stockQuantity: true,
+      createdAt: true,
+      updatedAt: true,
+      supplierId: true,
     },
     orderBy: {
-      updatedAt: "desc",
+      name: "asc",
     },
-  });
-
-  const suppliers = await prisma.supplier.findMany({
-    select: { id: true, name: true },
-    orderBy: { name: "asc" },
   });
 
   return (
     <SiteShell
-      currentPath="/"
-      pageTitle="Products"
+      currentPath="/qrcode"
+      pageTitle="QR Generator"
       session={session}
     >
-      <ProductWorkspace 
-        initialProducts={products.map(serializeProduct)} 
-        suppliers={suppliers}
-      />
+      <QRWorkspace products={products.map(serializeProduct)} />
     </SiteShell>
   );
 }

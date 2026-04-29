@@ -2,14 +2,14 @@ import { NextResponse } from "next/server";
 
 import { Prisma } from "@/generated/prisma-client-v2/index.js";
 import { getSession } from "@/lib/auth";
-import { serializeProduct } from "@/lib/product-catalog";
+import { serializeSupplier } from "@/lib/supplier-management";
 import { prisma } from "@/lib/prisma";
-import { productSchema } from "@/lib/validators";
+import { supplierSchema } from "@/lib/validators";
 
 function getWriteErrorResponse(error: unknown, fallbackMessage: string) {
   if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
     return NextResponse.json(
-      { error: "A product with this SKU already exists." },
+      { error: "A supplier with this phone number already exists." },
       { status: 409 },
     );
   }
@@ -25,10 +25,10 @@ export async function GET() {
   }
 
   try {
-    const products = await prisma.product.findMany({
+    const suppliers = await prisma.supplier.findMany({
       include: {
-        supplier: {
-          select: { name: true },
+        products: {
+          select: { id: true, name: true, sku: true },
         },
       },
       orderBy: {
@@ -37,13 +37,13 @@ export async function GET() {
     });
 
     return NextResponse.json({
-      products: products.map(serializeProduct),
+      suppliers: suppliers.map(serializeSupplier),
     });
   } catch (error) {
-    console.error("Product list error:", error);
+    console.error("Supplier list error:", error);
 
     return NextResponse.json(
-      { error: "Unable to load products right now." },
+      { error: "Unable to load suppliers right now." },
       { status: 500 },
     );
   }
@@ -58,33 +58,40 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    const parsedBody = productSchema.safeParse(body);
+    const parsedBody = supplierSchema.safeParse(body);
 
     if (!parsedBody.success) {
       return NextResponse.json(
-        { error: parsedBody.error.issues[0]?.message ?? "Enter valid product details." },
+        { error: parsedBody.error.issues[0]?.message ?? "Enter valid supplier details." },
         { status: 400 },
       );
     }
 
-    const product = await prisma.product.create({
-      data: parsedBody.data,
+    const { productIds, ...supplierData } = parsedBody.data;
+
+    const supplier = await prisma.supplier.create({
+      data: {
+        ...supplierData,
+        products: productIds?.length ? {
+          connect: productIds.map(id => ({ id }))
+        } : undefined,
+      },
       include: {
-        supplier: {
-          select: { name: true },
+        products: {
+          select: { id: true, name: true, sku: true },
         },
       },
     });
 
     return NextResponse.json(
       {
-        product: serializeProduct(product),
+        supplier: serializeSupplier(supplier),
       },
       { status: 201 },
     );
   } catch (error) {
-    console.error("Product create error:", error);
+    console.error("Supplier create error:", error);
 
-    return getWriteErrorResponse(error, "Unable to save the product right now.");
+    return getWriteErrorResponse(error, "Unable to save the supplier right now.");
   }
 }

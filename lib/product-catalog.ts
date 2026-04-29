@@ -25,6 +25,8 @@ export type ProductCatalogItem = {
   sizes: string[];
   price: number;
   stockQuantity: number;
+  supplierId?: string;
+  supplierName?: string;
   createdAt: string;
   updatedAt: string;
 };
@@ -37,6 +39,8 @@ type ProductLike = {
   sizes: string[];
   price: number;
   stockQuantity: number;
+  supplierId: string | null;
+  supplier?: { name: string } | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -50,6 +54,8 @@ export function serializeProduct(product: ProductLike): ProductCatalogItem {
     sizes: product.sizes,
     price: product.price,
     stockQuantity: product.stockQuantity,
+    supplierId: product.supplierId ?? undefined,
+    supplierName: product.supplier?.name,
     createdAt: product.createdAt.toISOString(),
     updatedAt: product.updatedAt.toISOString(),
   };

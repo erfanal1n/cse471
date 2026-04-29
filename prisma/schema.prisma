@@ -32,10 +32,26 @@ model Product {
   sizes         String[]
   price         Float
   stockQuantity Int
+  supplierId    String?  @db.ObjectId
+  supplier      Supplier? @relation(fields: [supplierId], references: [id])
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   @@index([category])
+  @@index([name])
+}
+
+model Supplier {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  contactPerson String?
+  email         String?
+  phone         String?   @unique
+  address       String?
+  products      Product[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
   @@index([name])
 }
 

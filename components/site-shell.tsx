@@ -35,7 +35,9 @@ export function SiteShell({
     { href: "/", label: "Products", active: currentPath === "/" },
     { href: "/orders", label: "Orders", active: currentPath === "/orders" },
     { href: "/customers", label: "Customers", active: currentPath === "/customers" },
-    { href: "#", label: "Suppliers", muted: true },
+    { href: "/qrcode", label: "QR Generator", active: currentPath === "/qrcode" },
+    { href: "/suppliers", label: "Suppliers", active: currentPath === "/suppliers" },
+    { href: "/analytics", label: "Analytics", active: currentPath === "/analytics" },
   ];
 
   return (

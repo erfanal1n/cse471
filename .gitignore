@@ -45,3 +45,9 @@ next-env.d.ts
 /generated/prisma-client-v2
 email-receipt-template.html
 .env.example
+read_pdfs.js
+Lab 07 _ Sample Report College Space.pdf
+.gitignore
+pdf_output.txt
+Template _ CSE471 Lab Project Report.pdf
+Copy of CSE-471 GROUP-5.pdf
